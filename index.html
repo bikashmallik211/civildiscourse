@@ -1,32 +1,245 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>CivilDiscourse</title>
-<link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivilDiscourse - Research & Discussion</title>
+
+<style>
+
+body{
+font-family: Georgia, serif;
+margin:0;
+background:#f4f6f8;
+color:#333;
+}
+
+header{
+background:#1e2a38;
+color:white;
+padding:15px 10%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+margin-left:20px;
+font-size:15px;
+}
+
+nav a:hover{
+text-decoration:underline;
+}
+
+.hero{
+padding:80px 10%;
+background:white;
+text-align:center;
+}
+
+.hero h1{
+font-size:40px;
+margin-bottom:10px;
+}
+
+.hero p{
+color:#555;
+max-width:700px;
+margin:auto;
+}
+
+.search-box{
+margin-top:30px;
+}
+
+.search-box input{
+padding:10px;
+width:250px;
+border:1px solid #ccc;
+}
+
+.search-box button{
+padding:10px 15px;
+background:#1e2a38;
+color:white;
+border:none;
+}
+
+.section{
+padding:60px 10%;
+}
+
+.section h2{
+margin-bottom:30px;
+}
+
+.posts{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:25px;
+}
+
+.post{
+background:white;
+padding:20px;
+border:1px solid #ddd;
+}
+
+.post h3{
+margin-top:0;
+}
+
+.categories{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.category{
+background:#e3e8ef;
+padding:8px 15px;
+font-size:14px;
+}
+
+footer{
+background:#1e2a38;
+color:white;
+text-align:center;
+padding:20px;
+margin-top:40px;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>CivilDiscourse</h1>
+<header>
+
+<h2>CivilDiscourse</h2>
 
 <nav>
-<a href="index.html">Home</a>
+    <a href="index.html">Home</a>
 <a href="authors.html">Authors</a>
 <a href="research.html">Research</a>
 <a href="projects.html">Projects</a>
 <a href="resources.html">Resources</a>
 <a href="contact.html">Contact</a>
+
 </nav>
 
+</header>
+
+
+<section class="hero">
+
+<h1>CivilDiscourse</h1>
+
+<p>
+A platform for research, policy discussion and academic dialogue 
+on governance, politics and society.
+</p>
+
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Search research posts">
+<button onclick="searchPost()">Search</button>
+</div>
+
+</section>
+
+
+
+<section class="section">
+
 <h2>Introduction</h2>
-<p>A platform for research, ideas and civil dialogue.</p>
+
+<p>
+CivilDiscourse is an academic platform dedicated to publishing research,
+policy analysis and thoughtful discussions on governance, federalism,
+public administration and political developments.
+</p>
+
+</section>
+
+
+
+<section class="section">
 
 <h2>Latest Posts</h2>
-<div id="posts"></div>
 
-<input type="text" placeholder="Search posts">
+<div class="posts">
 
-<script src="js/script.js"></script>
+<div class="post">
+<h3>Federalism in Nepal</h3>
+<p>Understanding the challenges and opportunities of federal governance.</p>
+</div>
+
+<div class="post">
+<h3>Citizen Participation</h3>
+<p>Exploring the role of citizens in strengthening local governance.</p>
+</div>
+
+<div class="post">
+<h3>Public Policy Reform</h3>
+<p>An analysis of recent policy reforms and their implications.</p>
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="section">
+
+<h2>Post Categories</h2>
+
+<div class="categories">
+
+<div class="category">Governance</div>
+<div class="category">Public Policy</div>
+<div class="category">Federalism</div>
+<div class="category">Political Economy</div>
+<div class="category">Local Government</div>
+<div class="category">Research Methods</div>
+
+</div>
+
+</section>
+
+
+
+<footer>
+
+<p>© 2026 CivilDiscourse | Academic Research Platform</p>
+
+</footer>
+
+
+<script>
+
+function searchPost(){
+
+let input=document.getElementById("searchInput").value.toLowerCase()
+
+let posts=document.querySelectorAll(".post")
+
+posts.forEach(post=>{
+if(post.innerText.toLowerCase().includes(input)){
+post.style.display="block"
+}else{
+post.style.display="none"
+}
+})
+
+}
+
+</script>
+
 
 </body>
 </html>
