@@ -48,7 +48,6 @@ border:none;
 cursor:pointer;
 }
 
-
 /* DASHBOARD */
 
 #dashboard{
@@ -56,12 +55,18 @@ display:none;
 padding:30px;
 }
 
-.editor{
+.grid{
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:30px;
+}
+
+.card{
 background:white;
-padding:25px;
+padding:20px;
 border-radius:8px;
-max-width:900px;
-margin:auto;
+margin-bottom:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 input,textarea,select{
@@ -72,12 +77,7 @@ border:1px solid #ccc;
 }
 
 textarea{
-height:200px;
-}
-
-.toolbar button{
-padding:6px 10px;
-margin-right:5px;
+height:150px;
 }
 
 button{
@@ -86,18 +86,31 @@ color:white;
 border:none;
 padding:10px 15px;
 cursor:pointer;
+margin-top:5px;
+}
+
+.clock{
+font-size:28px;
+font-weight:bold;
+}
+
+.postItem{
+border-bottom:1px solid #ddd;
+padding:10px 0;
+}
+
+.postItem button{
+margin-right:5px;
 }
 
 </style>
 
 </head>
 
-
-
 <body>
 
 
-<!-- LOGIN -->
+<!-- LOGIN PAGE -->
 
 <div id="loginPage">
 
@@ -105,9 +118,9 @@ cursor:pointer;
 
 <h2>Admin Login</h2>
 
-<input type="email" id="email" placeholder="Email">
+<input id="email" placeholder="Email">
 
-<input type="password" id="password" placeholder="Password">
+<input id="password" type="password" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
@@ -121,62 +134,106 @@ cursor:pointer;
 
 <div id="dashboard">
 
-<h1>CivilDiscourse Admin Editor</h1>
+<h1>CivilDiscourse Admin Dashboard</h1>
 
-<div class="editor">
-
-
-<h3>Create Post / Article</h3>
+<div class="grid">
 
 
-<label>Publish To Page</label>
+<!-- LEFT SIDE -->
+
+<div>
+
+
+<div class="card">
+
+<h3>Create / Edit Post</h3>
 
 <select id="page">
 
-<option value="research">Research Page</option>
 <option value="articles">Articles Page</option>
-<option value="resources">Resources Page</option>
-<option value="news">News Page</option>
+<option value="research">Research Page</option>
 
 </select>
 
+<input id="title" placeholder="Title">
 
+<input id="author" placeholder="Author">
 
-<label>Title</label>
+<input id="category" placeholder="Category">
 
-<input id="title" placeholder="Post Title">
+<textarea id="abstract" placeholder="Abstract"></textarea>
 
+<textarea id="content" placeholder="Full Content"></textarea>
 
-<label>Author</label>
-
-<input id="author" placeholder="Author Name">
-
-
-<label>Category</label>
-
-<input id="category" placeholder="Example: Governance">
-
-
-<label>Abstract / Summary</label>
-
-<textarea id="abstract"></textarea>
-
-
-<label>Article Content</label>
-
-<div class="toolbar">
-
-<button onclick="format('bold')"><b>B</b></button>
-<button onclick="format('italic')"><i>I</i></button>
-<button onclick="format('underline')"><u>U</u></button>
+<button onclick="publish()">Publish / Update</button>
 
 </div>
 
-<textarea id="content"></textarea>
+
+
+<div class="card">
+
+<h3>Manage Posts</h3>
+
+<div id="postList"></div>
+
+</div>
 
 
 
-<button onclick="publish()">Publish Post</button>
+<div class="card">
+
+<h3>Recent Comments</h3>
+
+<div id="commentList"></div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- RIGHT PANEL -->
+
+<div>
+
+
+<div class="card">
+
+<h3>Digital Clock</h3>
+
+<div class="clock" id="clock"></div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>Calendar</h3>
+
+<input type="date">
+
+</div>
+
+
+
+<div class="card">
+
+<h3>Analytics</h3>
+
+<p>Total Articles: <span id="totalArticles">0</span></p>
+
+<p>Total Research Posts: <span id="totalResearch">0</span></p>
+
+<p>Total Comments: <span id="totalComments">0</span></p>
+
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -187,11 +244,8 @@ cursor:pointer;
 <!-- FIREBASE -->
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
 
 
 <script>
@@ -208,13 +262,13 @@ apiKey: "AIzaSyBuDbslgaInn-UoWR1F-Z7_MZfw7JO5F4w",
   appId: "1:615565870121:web:46e5db45842435a1a1c838",
   measurementId: "G-21QJRQK7GF"
 
-};
+}
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
 
-const auth = firebase.auth();
+const auth=firebase.auth()
 
-const db = firebase.firestore();
+const db=firebase.firestore()
 
 
 
@@ -223,7 +277,6 @@ const db = firebase.firestore();
 function login(){
 
 let email=document.getElementById("email").value
-
 let password=document.getElementById("password").value
 
 auth.signInWithEmailAndPassword(email,password)
@@ -231,85 +284,212 @@ auth.signInWithEmailAndPassword(email,password)
 .then(()=>{
 
 document.getElementById("loginPage").style.display="none"
-
 document.getElementById("dashboard").style.display="block"
+
+loadAnalytics()
+loadComments()
+loadPosts()
 
 })
 
-.catch(error=>alert(error.message))
+.catch(e=>alert(e.message))
 
 }
 
 
 
-/* TEXT FORMATTING */
-
-function format(type){
-
-let textarea=document.getElementById("content")
-
-let start=textarea.selectionStart
-
-let end=textarea.selectionEnd
-
-let selected=textarea.value.substring(start,end)
-
-let before=textarea.value.substring(0,start)
-
-let after=textarea.value.substring(end)
-
-if(type=="bold"){
-textarea.value=before+"<b>"+selected+"</b>"+after
-}
-
-if(type=="italic"){
-textarea.value=before+"<i>"+selected+"</i>"+after
-}
-
-if(type=="underline"){
-textarea.value=before+"<u>"+selected+"</u>"+after
-}
-
-}
-
-
-
-/* PUBLISH POST */
+/* PUBLISH OR UPDATE */
 
 function publish(){
 
 let page=document.getElementById("page").value
 
-let title=document.getElementById("title").value
+let data={
 
-let author=document.getElementById("author").value
-
-let category=document.getElementById("category").value
-
-let abstract=document.getElementById("abstract").value
-
-let content=document.getElementById("content").value
-
-
-
-db.collection(page).add({
-
-title:title,
-author:author,
-category:category,
-abstract:abstract,
-content:content,
+title:document.getElementById("title").value,
+author:document.getElementById("author").value,
+category:document.getElementById("category").value,
+abstract:document.getElementById("abstract").value,
+content:document.getElementById("content").value,
 date:new Date()
 
-})
+}
+
+if(window.editingId){
+
+db.collection(page).doc(window.editingId).update(data)
 
 .then(()=>{
 
-alert("Post Published Successfully")
+alert("Post Updated")
+window.editingId=null
+loadPosts()
 
 })
 
 }
+
+else{
+
+db.collection(page).add(data)
+
+.then(()=>{
+
+alert("Post Published")
+loadPosts()
+
+})
+
+}
+
+}
+
+
+
+/* LOAD POSTS */
+
+function loadPosts(){
+
+let container=document.getElementById("postList")
+
+container.innerHTML=""
+
+db.collection("articles").get().then(snapshot=>{
+
+snapshot.forEach(doc=>{
+
+let post=doc.data()
+
+container.innerHTML+=`
+
+<div class="postItem">
+
+<b>${post.title}</b>
+
+<br>
+
+<button onclick="editPost('${doc.id}')">Edit</button>
+
+<button onclick="deletePost('${doc.id}')">Delete</button>
+
+</div>
+
+`
+
+})
+
+})
+
+}
+
+
+
+/* EDIT POST */
+
+function editPost(id){
+
+db.collection("articles").doc(id).get()
+
+.then(doc=>{
+
+let post=doc.data()
+
+document.getElementById("title").value=post.title
+document.getElementById("author").value=post.author
+document.getElementById("category").value=post.category
+document.getElementById("abstract").value=post.abstract
+document.getElementById("content").value=post.content
+
+window.editingId=id
+
+})
+
+}
+
+
+
+/* DELETE POST */
+
+function deletePost(id){
+
+if(confirm("Delete this post?")){
+
+db.collection("articles").doc(id).delete()
+
+.then(()=>{
+
+alert("Post Deleted")
+loadPosts()
+
+})
+
+}
+
+}
+
+
+
+/* ANALYTICS */
+
+function loadAnalytics(){
+
+db.collection("articles").get().then(s=>{
+document.getElementById("totalArticles").innerText=s.size
+})
+
+db.collection("research").get().then(s=>{
+document.getElementById("totalResearch").innerText=s.size
+})
+
+db.collection("comments").get().then(s=>{
+document.getElementById("totalComments").innerText=s.size
+})
+
+}
+
+
+
+/* LOAD COMMENTS */
+
+function loadComments(){
+
+db.collection("comments")
+.orderBy("date","desc")
+.limit(5)
+.get()
+.then(snapshot=>{
+
+let container=document.getElementById("commentList")
+
+container.innerHTML=""
+
+snapshot.forEach(doc=>{
+
+let c=doc.data()
+
+container.innerHTML+=`
+
+<p><b>${c.name}</b>: ${c.message}</p>
+
+`
+
+})
+
+})
+
+}
+
+
+
+/* DIGITAL CLOCK */
+
+setInterval(()=>{
+
+let now=new Date()
+
+document.getElementById("clock").innerText=now.toLocaleTimeString()
+
+},1000)
 
 </script>
 

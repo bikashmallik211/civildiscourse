@@ -30,10 +30,10 @@ nav a{
 color:white;
 margin-left:20px;
 text-decoration:none;
+font-size:15px;
 }
 
-
-/* LAYOUT */
+/* PAGE LAYOUT */
 
 .container{
 display:grid;
@@ -42,53 +42,71 @@ gap:30px;
 padding:30px;
 }
 
-
 /* ARTICLE CARD */
 
-.article{
+.card{
 background:white;
-padding:20px;
+padding:25px;
 border-radius:8px;
-margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
+margin-bottom:25px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+transition:0.3s;
+cursor:pointer;
 }
 
-.article h2{
+.card:hover{
+transform:translateY(-4px);
+}
+
+.card h2{
 margin-top:0;
+font-size:22px;
 }
 
 .meta{
 font-size:14px;
 color:#666;
-margin-bottom:10px;
+margin-top:10px;
 }
 
-.abstract{
-color:#444;
-margin-bottom:10px;
+.category{
+display:inline-block;
+background:#e6edf5;
+padding:4px 10px;
+border-radius:5px;
+margin-top:10px;
+font-size:13px;
 }
 
-.read{
-color:#1f2d3d;
-font-weight:bold;
-cursor:pointer;
-}
-
-
-/* SEARCH PANEL */
+/* SIDEBAR */
 
 .sidebar{
 background:white;
 padding:20px;
 border-radius:8px;
 height:fit-content;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sidebar h3{
+margin-top:0;
 }
 
 .sidebar input{
 width:100%;
 padding:10px;
 border:1px solid #ccc;
-margin-bottom:10px;
+margin-bottom:15px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.container{
+grid-template-columns:1fr;
+}
+
 }
 
 </style>
@@ -121,9 +139,9 @@ margin-bottom:10px;
 <div class="container">
 
 
-<!-- ARTICLES -->
+<!-- ARTICLE LIST -->
 
-<div id="articles"></div>
+<div id="articleList"></div>
 
 
 
@@ -133,10 +151,12 @@ margin-bottom:10px;
 
 <h3>Search Articles</h3>
 
-<input id="search" placeholder="Search topic...">
+<input id="search" placeholder="Search articles...">
 
 <p style="font-size:14px;color:gray">
-Search by title, author, or category.
+
+Search by title, author or category.
+
 </p>
 
 </div>
@@ -175,10 +195,11 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 
-let allArticles=[];
+
+let allPosts=[];
 
 
-/* LOAD ARTICLES */
+/* LOAD POSTS */
 
 db.collection("articles")
 .orderBy("date","desc")
@@ -189,9 +210,11 @@ snapshot.forEach(doc=>{
 
 let data=doc.data()
 
-allArticles.push(data)
+data.id=doc.id
 
-renderArticles(allArticles)
+allPosts.push(data)
+
+renderPosts(allPosts)
 
 })
 
@@ -199,35 +222,37 @@ renderArticles(allArticles)
 
 
 
-/* RENDER FUNCTION */
+/* RENDER POSTS */
 
-function renderArticles(list){
+function renderPosts(list){
 
-let container=document.getElementById("articles")
+let container=document.getElementById("articleList")
 
 container.innerHTML=""
 
-list.forEach(article=>{
+list.forEach(post=>{
+
+let date=""
+
+if(post.date){
+date=new Date(post.date.seconds*1000).toDateString()
+}
 
 container.innerHTML+=`
 
-<div class="article">
+<div class="card" onclick="openArticle('${post.id}')">
 
-<h2>${article.title}</h2>
+<h2>${post.title}</h2>
 
 <div class="meta">
-Author: ${article.author} | Category: ${article.category}
-</div>
 
-<div class="abstract">
-
-${article.abstract}
+Author: ${post.author} | ${date}
 
 </div>
 
-<div class="read">
+<div class="category">
 
-${article.content}
+${post.category}
 
 </div>
 
@@ -241,23 +266,33 @@ ${article.content}
 
 
 
+/* OPEN FULL ARTICLE */
+
+function openArticle(id){
+
+window.location="article.html?id="+id
+
+}
+
+
+
 /* SEARCH */
 
 document.getElementById("search").addEventListener("input",function(){
 
 let text=this.value.toLowerCase()
 
-let filtered=allArticles.filter(article=>
+let filtered=allPosts.filter(post=>
 
-article.title.toLowerCase().includes(text) ||
+post.title.toLowerCase().includes(text) ||
 
-article.author.toLowerCase().includes(text) ||
+post.author.toLowerCase().includes(text) ||
 
-article.category.toLowerCase().includes(text)
+post.category.toLowerCase().includes(text)
 
 )
 
-renderArticles(filtered)
+renderPosts(filtered)
 
 })
 

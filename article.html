@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>CivilDiscourse Article</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f6f9;
+}
+
+/* NAVBAR */
+
+header{
+background:#1f2d3d;
+color:white;
+padding:15px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+nav a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+}
+
+/* LAYOUT */
+
+.container{
+display:grid;
+grid-template-columns:3fr 1fr;
+gap:30px;
+padding:30px;
+}
+
+/* ARTICLE */
+
+.article{
+background:white;
+padding:30px;
+border-radius:8px;
+box-shadow:0 3px 12px rgba(0,0,0,0.1);
+}
+
+.article h1{
+margin-top:0;
+}
+
+.meta{
+color:#666;
+margin-bottom:20px;
+font-size:14px;
+}
+
+.content{
+line-height:1.7;
+font-size:16px;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 3px 12px rgba(0,0,0,0.1);
+height:fit-content;
+}
+
+/* COMMENT FORM */
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:10px 0;
+border:1px solid #ccc;
+}
+
+textarea{
+height:120px;
+}
+
+button{
+background:#1f2d3d;
+color:white;
+border:none;
+padding:10px 15px;
+cursor:pointer;
+}
+
+/* COMMENTS */
+
+.comment{
+background:#f4f6f9;
+padding:10px;
+margin-top:10px;
+border-radius:5px;
+font-size:14px;
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<header>
+
+<h2>CivilDiscourse</h2>
+
+<nav>
+
+<a href="index.html">Home</a>
+<a href="research.html">Research</a>
+<a href="articles.html">Articles</a>
+<a href="about.html">About</a>
+
+</nav>
+
+</header>
+
+
+
+<div class="container">
+
+
+<!-- ARTICLE CONTENT -->
+
+<div class="article">
+
+<h1 id="title"></h1>
+
+<div class="meta" id="meta"></div>
+
+<div class="content" id="content"></div>
+
+</div>
+
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<h3>Search</h3>
+
+<input id="search" placeholder="Search articles">
+
+
+<h3>Send Comment</h3>
+
+<input id="name" placeholder="Your Name">
+
+<input id="email" placeholder="Your Email">
+
+<textarea id="message" placeholder="Write message"></textarea>
+
+<button onclick="sendComment()">Submit</button>
+
+
+<h3>Comments</h3>
+
+<div id="comments"></div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+
+
+<script>
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBuDbslgaInn-UoWR1F-Z7_MZfw7JO5F4w",
+  authDomain: "civildiscourse-a453d.firebaseapp.com",
+  projectId: "civildiscourse-a453d",
+  storageBucket: "civildiscourse-a453d.firebasestorage.app",
+  messagingSenderId: "615565870121",
+  appId: "1:615565870121:web:46e5db45842435a1a1c838",
+  measurementId: "G-21QJRQK7GF"
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+
+
+/* GET POST ID */
+
+const urlParams=new URLSearchParams(window.location.search)
+
+const postId=urlParams.get("id")
+
+
+
+/* LOAD ARTICLE */
+
+db.collection("articles").doc(postId).get()
+
+.then(doc=>{
+
+let post=doc.data()
+
+let date=""
+
+if(post.date){
+date=new Date(post.date.seconds*1000).toDateString()
+}
+
+document.getElementById("title").innerHTML=post.title
+
+document.getElementById("meta").innerHTML=
+
+"Author: "+post.author+" | Category: "+post.category+" | "+date
+
+document.getElementById("content").innerHTML=post.content
+
+})
+
+
+
+/* SEND COMMENT */
+
+function sendComment(){
+
+let name=document.getElementById("name").value
+
+let email=document.getElementById("email").value
+
+let message=document.getElementById("message").value
+
+
+db.collection("comments").add({
+
+postId:postId,
+name:name,
+email:email,
+message:message,
+date:new Date()
+
+})
+
+.then(()=>{
+
+alert("Comment submitted")
+
+loadComments()
+
+})
+
+}
+
+
+
+/* LOAD COMMENTS */
+
+function loadComments(){
+
+db.collection("comments")
+.where("postId","==",postId)
+.get()
+.then(snapshot=>{
+
+let container=document.getElementById("comments")
+
+container.innerHTML=""
+
+snapshot.forEach(doc=>{
+
+let c=doc.data()
+
+container.innerHTML+=`
+
+<div class="comment">
+
+<b>${c.name}</b><br>
+
+${c.message}
+
+</div>
+
+`
+
+})
+
+})
+
+}
+
+loadComments()
+
+</script>
+
+
+</body>
+
+</html>
