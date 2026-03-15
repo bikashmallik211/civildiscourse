@@ -32,8 +32,7 @@ margin-left:20px;
 text-decoration:none;
 }
 
-
-/* LAYOUT */
+/* PAGE LAYOUT */
 
 .container{
 display:grid;
@@ -42,46 +41,49 @@ gap:30px;
 padding:30px;
 }
 
+/* CARD */
 
-/* RESEARCH CARD */
-
-.research{
+.card{
 background:white;
 padding:25px;
 border-radius:8px;
 margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+cursor:pointer;
+transition:0.3s;
 }
 
-.research h2{
+.card:hover{
+transform:translateY(-4px);
+}
+
+.card h2{
 margin-top:0;
 }
 
 .meta{
 font-size:14px;
 color:#666;
-margin-bottom:10px;
+margin-top:10px;
 }
 
-.abstract{
-color:#444;
-margin-bottom:15px;
-line-height:1.6;
+.category{
+display:inline-block;
+background:#e6edf5;
+padding:4px 10px;
+border-radius:5px;
+margin-top:10px;
+font-size:13px;
 }
 
-.content{
-font-size:15px;
-color:#333;
-}
-
-
-/* SEARCH PANEL */
+/* SIDEBAR */
 
 .sidebar{
 background:white;
 padding:20px;
 border-radius:8px;
 height:fit-content;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 .sidebar input{
@@ -89,6 +91,16 @@ width:100%;
 padding:10px;
 border:1px solid #ccc;
 margin-bottom:10px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.container{
+grid-template-columns:1fr;
+}
+
 }
 
 </style>
@@ -133,11 +145,11 @@ margin-bottom:10px;
 
 <h3>Search Research</h3>
 
-<input id="search" placeholder="Search research topic...">
+<input id="search" placeholder="Search research...">
 
 <p style="font-size:14px;color:gray">
 
-Search by title, author, category or abstract.
+Search by title, author or category.
 
 </p>
 
@@ -170,17 +182,21 @@ apiKey: "AIzaSyBuDbslgaInn-UoWR1F-Z7_MZfw7JO5F4w",
   appId: "1:615565870121:web:46e5db45842435a1a1c838",
   measurementId: "G-21QJRQK7GF"
 
-};
 
-firebase.initializeApp(firebaseConfig);
+}
 
-const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig)
 
-
-let allResearch=[];
+const db = firebase.firestore()
 
 
-/* LOAD RESEARCH */
+
+/* STORE POSTS */
+
+let allResearch = []
+
+
+/* LOAD POSTS */
 
 db.collection("research")
 .orderBy("date","desc")
@@ -189,50 +205,49 @@ db.collection("research")
 
 snapshot.forEach(doc=>{
 
-let data=doc.data()
+let data = doc.data()
+data.id = doc.id
 
 allResearch.push(data)
+
+})
 
 renderResearch(allResearch)
 
 })
 
-})
 
 
-
-/* RENDER RESEARCH */
+/* DISPLAY POSTS */
 
 function renderResearch(list){
 
-let container=document.getElementById("researchList")
+let container = document.getElementById("researchList")
 
-container.innerHTML=""
+container.innerHTML = ""
 
 list.forEach(post=>{
 
-container.innerHTML+=`
+let date = ""
 
-<div class="research">
+if(post.date){
+
+date = new Date(post.date.seconds*1000).toDateString()
+
+}
+
+container.innerHTML += `
+
+<div class="card" onclick="openResearch('${post.id}')">
 
 <h2>${post.title}</h2>
 
 <div class="meta">
-
-Author: ${post.author} | Category: ${post.category}
-
+Author: ${post.author} | ${date}
 </div>
 
-<div class="abstract">
-
-${post.abstract}
-
-</div>
-
-<div class="content">
-
-${post.content}
-
+<div class="category">
+${post.category}
 </div>
 
 </div>
@@ -245,21 +260,28 @@ ${post.content}
 
 
 
-/* SEARCH FUNCTION */
+/* OPEN FULL ARTICLE */
+
+function openResearch(id){
+
+window.location = "article.html?id=" + id
+
+}
+
+
+
+/* SEARCH */
 
 document.getElementById("search").addEventListener("input",function(){
 
-let text=this.value.toLowerCase()
+let text = this.value.toLowerCase()
 
-let filtered=allResearch.filter(post=>
+let filtered = allResearch.filter(post =>
 
-post.title.toLowerCase().includes(text) ||
-
-post.author.toLowerCase().includes(text) ||
-
-post.category.toLowerCase().includes(text) ||
-
-post.abstract.toLowerCase().includes(text)
+(post.title || "").toLowerCase().includes(text) ||
+(post.author || "").toLowerCase().includes(text) ||
+(post.category || "").toLowerCase().includes(text) ||
+(post.abstract || "").toLowerCase().includes(text)
 
 )
 

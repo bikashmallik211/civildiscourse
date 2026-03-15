@@ -30,7 +30,6 @@ nav a{
 color:white;
 margin-left:20px;
 text-decoration:none;
-font-size:15px;
 }
 
 /* PAGE LAYOUT */
@@ -42,16 +41,16 @@ gap:30px;
 padding:30px;
 }
 
-/* ARTICLE CARD */
+/* CARD */
 
 .card{
 background:white;
 padding:25px;
 border-radius:8px;
-margin-bottom:25px;
+margin-bottom:20px;
 box-shadow:0 4px 12px rgba(0,0,0,0.1);
-transition:0.3s;
 cursor:pointer;
+transition:0.3s;
 }
 
 .card:hover{
@@ -60,7 +59,6 @@ transform:translateY(-4px);
 
 .card h2{
 margin-top:0;
-font-size:22px;
 }
 
 .meta{
@@ -88,15 +86,11 @@ height:fit-content;
 box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-.sidebar h3{
-margin-top:0;
-}
-
 .sidebar input{
 width:100%;
 padding:10px;
 border:1px solid #ccc;
-margin-bottom:15px;
+margin-bottom:10px;
 }
 
 /* RESPONSIVE */
@@ -139,7 +133,7 @@ grid-template-columns:1fr;
 <div class="container">
 
 
-<!-- ARTICLE LIST -->
+<!-- ARTICLES -->
 
 <div id="articleList"></div>
 
@@ -188,15 +182,17 @@ apiKey: "AIzaSyBuDbslgaInn-UoWR1F-Z7_MZfw7JO5F4w",
   appId: "1:615565870121:web:46e5db45842435a1a1c838",
   measurementId: "G-21QJRQK7GF"
 
-};
+}
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
 
-const db = firebase.firestore();
+const db = firebase.firestore()
 
 
 
-let allPosts=[];
+/* STORE POSTS */
+
+let allPosts = []
 
 
 /* LOAD POSTS */
@@ -208,52 +204,49 @@ db.collection("articles")
 
 snapshot.forEach(doc=>{
 
-let data=doc.data()
-
-data.id=doc.id
+let data = doc.data()
+data.id = doc.id
 
 allPosts.push(data)
+
+})
 
 renderPosts(allPosts)
 
 })
 
-})
 
 
-
-/* RENDER POSTS */
+/* DISPLAY POSTS */
 
 function renderPosts(list){
 
-let container=document.getElementById("articleList")
+let container = document.getElementById("articleList")
 
-container.innerHTML=""
+container.innerHTML = ""
 
 list.forEach(post=>{
 
-let date=""
+let date = ""
 
 if(post.date){
-date=new Date(post.date.seconds*1000).toDateString()
+
+date = new Date(post.date.seconds*1000).toDateString()
+
 }
 
-container.innerHTML+=`
+container.innerHTML += `
 
 <div class="card" onclick="openArticle('${post.id}')">
 
 <h2>${post.title}</h2>
 
 <div class="meta">
-
 Author: ${post.author} | ${date}
-
 </div>
 
 <div class="category">
-
 ${post.category}
-
 </div>
 
 </div>
@@ -266,11 +259,11 @@ ${post.category}
 
 
 
-/* OPEN FULL ARTICLE */
+/* OPEN ARTICLE */
 
 function openArticle(id){
 
-window.location="article.html?id="+id
+window.location = "article.html?id=" + id
 
 }
 
@@ -280,15 +273,14 @@ window.location="article.html?id="+id
 
 document.getElementById("search").addEventListener("input",function(){
 
-let text=this.value.toLowerCase()
+let text = this.value.toLowerCase()
 
-let filtered=allPosts.filter(post=>
+let filtered = allPosts.filter(post =>
 
-post.title.toLowerCase().includes(text) ||
-
-post.author.toLowerCase().includes(text) ||
-
-post.category.toLowerCase().includes(text)
+(post.title || "").toLowerCase().includes(text) ||
+(post.author || "").toLowerCase().includes(text) ||
+(post.category || "").toLowerCase().includes(text) ||
+(post.abstract || "").toLowerCase().includes(text)
 
 )
 
