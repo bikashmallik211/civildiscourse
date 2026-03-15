@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>CivilDiscourse Admin</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
-font-family: Arial, sans-serif;
+font-family:Arial;
 margin:0;
 background:#f4f6f9;
 }
 
-/* LOGIN PAGE */
+/* LOGIN */
 
 #loginPage{
-display:flex;
 height:100vh;
+display:flex;
 justify-content:center;
 align-items:center;
 background:#1f2d3d;
@@ -32,14 +31,12 @@ padding:40px;
 width:320px;
 border-radius:8px;
 text-align:center;
-box-shadow:0 5px 20px rgba(0,0,0,0.2);
 }
 
 .login-box input{
 width:100%;
 padding:10px;
 margin:10px 0;
-border:1px solid #ccc;
 }
 
 .login-box button{
@@ -51,37 +48,36 @@ border:none;
 cursor:pointer;
 }
 
+
 /* DASHBOARD */
 
 #dashboard{
 display:none;
-}
-
-header{
-background:#1f2d3d;
-color:white;
-padding:15px 30px;
-display:flex;
-justify-content:space-between;
-}
-
-.container{
 padding:30px;
 }
 
-.card{
+.editor{
 background:white;
-padding:20px;
+padding:25px;
 border-radius:8px;
-margin-bottom:20px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
+max-width:900px;
+margin:auto;
 }
 
-input, textarea{
+input,textarea,select{
 width:100%;
 padding:10px;
 margin:10px 0;
 border:1px solid #ccc;
+}
+
+textarea{
+height:200px;
+}
+
+.toolbar button{
+padding:6px 10px;
+margin-right:5px;
 }
 
 button{
@@ -92,27 +88,16 @@ padding:10px 15px;
 cursor:pointer;
 }
 
-.stats{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-gap:20px;
-}
-
-.stat-box{
-background:#eef2f6;
-padding:20px;
-text-align:center;
-border-radius:6px;
-}
-
 </style>
 
 </head>
 
+
+
 <body>
 
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 
 <div id="loginPage">
 
@@ -120,7 +105,7 @@ border-radius:6px;
 
 <h2>Admin Login</h2>
 
-<input type="email" id="email" placeholder="Admin Email">
+<input type="email" id="email" placeholder="Email">
 
 <input type="password" id="password" placeholder="Password">
 
@@ -136,112 +121,62 @@ border-radius:6px;
 
 <div id="dashboard">
 
-<header>
+<h1>CivilDiscourse Admin Editor</h1>
 
-<h2>CivilDiscourse Admin</h2>
-
-<button onclick="logout()">Logout</button>
-
-</header>
+<div class="editor">
 
 
-<div class="container">
+<h3>Create Post / Article</h3>
 
 
-<!-- CREATE POST -->
+<label>Publish To Page</label>
 
-<div class="card">
+<select id="page">
 
-<h3>Create Article</h3>
+<option value="research">Research Page</option>
+<option value="articles">Articles Page</option>
+<option value="resources">Resources Page</option>
+<option value="news">News Page</option>
 
-<input type="text" placeholder="Post Title">
-
-<textarea placeholder="Write article content"></textarea>
-
-<button>Publish Post</button>
-
-</div>
+</select>
 
 
 
-<!-- UPLOAD RESEARCH -->
+<label>Title</label>
 
-<div class="card">
-
-<h3>Upload Research Paper</h3>
-
-<input type="text" placeholder="Research Title">
-
-<input type="text" placeholder="Author">
-
-<textarea placeholder="Abstract"></textarea>
-
-<input type="file">
-
-<button>Upload PDF</button>
-
-</div>
+<input id="title" placeholder="Post Title">
 
 
+<label>Author</label>
 
-<!-- UPLOAD RESOURCES -->
+<input id="author" placeholder="Author Name">
 
-<div class="card">
 
-<h3>Upload Study Resources</h3>
+<label>Category</label>
 
-<input type="file">
+<input id="category" placeholder="Example: Governance">
 
-<button>Upload Resource</button>
+
+<label>Abstract / Summary</label>
+
+<textarea id="abstract"></textarea>
+
+
+<label>Article Content</label>
+
+<div class="toolbar">
+
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
 
 </div>
 
-
-
-<!-- ANALYTICS -->
-
-<div class="card">
-
-<h3>Website Analytics</h3>
-
-<div class="stats">
-
-<div class="stat-box">
-<h3>0</h3>
-<p>Visitors</p>
-</div>
-
-<div class="stat-box">
-<h3>0</h3>
-<p>Research Papers</p>
-</div>
-
-<div class="stat-box">
-<h3>0</h3>
-<p>Downloads</p>
-</div>
-
-<div class="stat-box">
-<h3>0</h3>
-<p>Comments</p>
-</div>
-
-</div>
-
-</div>
+<textarea id="content"></textarea>
 
 
 
-<!-- COMMENTS -->
-
-<div class="card">
-
-<h3>Manage Comments</h3>
-
-<p>No comments yet</p>
-
-</div>
-
+<button onclick="publish()">Publish Post</button>
 
 </div>
 
@@ -252,12 +187,16 @@ border-radius:6px;
 <!-- FIREBASE -->
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 
 
 <script>
 
-/* YOUR FIREBASE CONFIG */
+/* FIREBASE CONFIG */
 
 const firebaseConfig = {
 
@@ -275,9 +214,11 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 
+const db = firebase.firestore();
 
 
-/* LOGIN FUNCTION */
+
+/* LOGIN */
 
 function login(){
 
@@ -295,23 +236,78 @@ document.getElementById("dashboard").style.display="block"
 
 })
 
-.catch((error)=>{
-
-alert(error.message)
-
-})
+.catch(error=>alert(error.message))
 
 }
 
 
 
-/* LOGOUT */
+/* TEXT FORMATTING */
 
-function logout(){
+function format(type){
 
-auth.signOut()
+let textarea=document.getElementById("content")
 
-location.reload()
+let start=textarea.selectionStart
+
+let end=textarea.selectionEnd
+
+let selected=textarea.value.substring(start,end)
+
+let before=textarea.value.substring(0,start)
+
+let after=textarea.value.substring(end)
+
+if(type=="bold"){
+textarea.value=before+"<b>"+selected+"</b>"+after
+}
+
+if(type=="italic"){
+textarea.value=before+"<i>"+selected+"</i>"+after
+}
+
+if(type=="underline"){
+textarea.value=before+"<u>"+selected+"</u>"+after
+}
+
+}
+
+
+
+/* PUBLISH POST */
+
+function publish(){
+
+let page=document.getElementById("page").value
+
+let title=document.getElementById("title").value
+
+let author=document.getElementById("author").value
+
+let category=document.getElementById("category").value
+
+let abstract=document.getElementById("abstract").value
+
+let content=document.getElementById("content").value
+
+
+
+db.collection(page).add({
+
+title:title,
+author:author,
+category:category,
+abstract:abstract,
+content:content,
+date:new Date()
+
+})
+
+.then(()=>{
+
+alert("Post Published Successfully")
+
+})
 
 }
 
